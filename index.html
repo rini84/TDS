@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Grafik TDS</title>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial;
+    }
+
+    .container {
+      width: 800px;
+      margin: auto;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>Grafik TDS Realtime</h2>
+
+  <div class="container">
+    <canvas id="chartTDS"></canvas>
+  </div>
+
+  <p>TDS Sekarang: <span id="tdsNow">-</span></p>
+
+<script>
+  const firebaseConfig = {
+    databaseURL: "https://hidroponik-29d8c-default-rtdb.firebaseio.com/"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  let labels = [];
+  let dataTDS = [];
+
+  const ctx = document.getElementById('chartTDS').getContext('2d');
+
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'TDS',
+        data: dataTDS,
+        borderWidth: 4,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          min: 0,     // 🔥 batas bawah
+          max: 1500   // 🔥 batas atas (skala tetap)
+        }
+      }
+    }
+  });
+
+  db.ref("iot_project/tds").on("value", (snapshot) => {
+    let tds = snapshot.val();
+    let time = new Date().toLocaleTimeString();
+
+    document.getElementById("tdsNow").innerText = tds;
+
+    if (labels.length > 10) {
+      labels.shift();
+      dataTDS.shift();
+    }
+
+    labels.push(time);
+    dataTDS.push(tds);
+
+    chart.update();
+  });
+</script>
+
+</body>
+</html>
