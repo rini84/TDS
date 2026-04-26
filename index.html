@@ -68,7 +68,7 @@
     }
   });
 
-  db.ref("iot_project/tds").on("value", (snapshot) => {
+  db.ref("iot/tds").on("value", (snapshot) => {
     let tds = snapshot.val();
     let time = new Date().toLocaleTimeString();
 
